@@ -2,6 +2,15 @@
   "name": "archtrace",
   "version": "0.1.0",
   "description": "Check that code and deployment configs match a LikeC4 architecture model. Includes Claude Code skills to draft the model from docs and resolve drift.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdityaNerpagar/Archtrace.git"
+  },
+  "homepage": "https://github.com/AdityaNerpagar/Archtrace#readme",
+  "bugs": {
+    "url": "https://github.com/AdityaNerpagar/Archtrace/issues"
+  },
+  "author": "Aditya Nerpagar",
   "scripts": {
     "build": "tsc && node -e \"require('fs').chmodSync('dist/cli.js',0o755)\"",
     "check": "node dist/cli.js check",

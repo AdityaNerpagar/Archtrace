@@ -1,4 +1,4 @@
-# ArchGuard
+# archtrace
 
 Keeps your code and your architecture diagram in agreement. The diagram is a
 [LikeC4](https://likec4.dev) model: every arrow in it is an allowed dependency, and
@@ -6,7 +6,7 @@ anything not drawn is a violation, whether it's an import between code folders o
 network call between services.
 
 ```
-$ archguard check
+$ archtrace check
 ✗ 2 dependencies are not in the architecture (3 files and 1 deployment config checked):
 
   Web app (shop.web) → Database access (shop.db)   1 import
@@ -26,7 +26,7 @@ Emerge view and network checks work for any language.
 ```
 docs ──draft-architecture──► model ◄──── you review and approve
                                │
-            archguard check ◄──┤──► archguard actual (Emerge + configs)
+            archtrace check ◄──┤──► archtrace actual (Emerge + configs)
                                │
                  violations ──align-architecture──► you decide each one:
                                                     fix the code, or change the model
@@ -34,27 +34,37 @@ docs ──draft-architecture──► model ◄──── you review and appr
 
 | Step | How |
 | --- | --- |
-| Start a model from folders | `archguard init` |
+| Start a model from folders | `archtrace init` |
 | Draft it from documentation | Claude Code skill `draft-architecture` |
 | Review and approve | `npx likec4 start architecture`, edit the `.c4` files |
-| Check imports and network calls | `archguard check` |
-| See the architecture as it really is | `archguard actual` |
+| Check imports and network calls | `archtrace check` |
+| See the architecture as it really is | `archtrace actual` |
 | Resolve violations, human decides | Claude Code skill `align-architecture` |
 
-## Set up
+## Install
 
 Requires Node.js 20 or newer.
 
 ```
+npm install -g archtrace
+```
+
+The Claude Code skills are also on [Agensi](https://www.agensi.io) as
+`draft-architecture` and `align-architecture`, or install them into a project with
+`archtrace install-skill`.
+
+### From source
+
+```
 npm install
 npm run build
-npm link        # makes the `archguard` command available everywhere
+npm link        # makes the `archtrace` command available everywhere
 ```
 
 `npm link` points at this folder, so after you change the code, `npm run build`
 is all you need.
 
-Optional, for `archguard actual`: [Emerge](https://github.com/glato/emerge), a free
+Optional, for `archtrace actual`: [Emerge](https://github.com/glato/emerge), a free
 local Python tool.
 
 ```
@@ -65,14 +75,14 @@ uv tool install emerge-viz --python 3.11 --with 'setuptools<81' --with pip
 (or `pipx install emerge-viz && pipx inject emerge-viz 'setuptools<81' pip`). The
 extra packages fix Emerge's compatibility with current Python tooling.
 
-Optional, for the Claude Code skills: `archguard install-skill` in your project
+Optional, for the Claude Code skills: `archtrace install-skill` in your project
 (`--global` for all projects).
 
 ## 1. Get a model
 
 All commands use `architecture/` unless you pass `--model <folder>`.
 
-- **From your folders:** `archguard init` creates a starter model with one element per
+- **From your folders:** `archtrace init` creates a starter model with one element per
   folder in `src/` (or the project root), already mapped to its code. Add
   `--from-code` to also draw the dependencies that exist today, so the check starts
   green and you delete the arrows that shouldn't exist. It never overwrites a model.
@@ -106,7 +116,7 @@ in the `.c4` files. When the team agrees, change `status 'draft'` to `'approved'
 
 ## 3. Check
 
-`archguard check` is the fast, pass/fail gate: no Emerge, nothing written to disk, just
+`archtrace check` is the fast, pass/fail gate: no Emerge, nothing written to disk, just
 an exit code. It checks two things directly against the model:
 
 - **Imports** between code folders (JavaScript/TypeScript, via dependency-cruiser). This
@@ -130,7 +140,7 @@ Exit codes: `0` everything matches, `1` violations found, `2` the check couldn't
 
 ## 4. See the architecture as it really is
 
-While `check` only tells you pass/fail, `archguard actual` is the exploratory,
+While `check` only tells you pass/fail, `archtrace actual` is the exploratory,
 visual counterpart: it runs Emerge on the mapped folders to build a full dependency
 graph of the code (the same import relationships `check` validates, but as a diagram
 you can browse), reuses the same deployment-config scan for network connections, and
@@ -150,13 +160,13 @@ It also reports arrows in the model the code never uses, elements whose code Eme
 splits into several clusters (maybe two things in one box), and clusters that mix
 elements (maybe tight coupling). It writes:
 
-- `.archguard/actual/likec4/`: a LikeC4 diagram of your elements with the dependencies
+- `.archtrace/actual/likec4/`: a LikeC4 diagram of your elements with the dependencies
   that really exist; anything not in the model is red. Open it with
-  `npx likec4 start .archguard/actual/likec4`.
+  `npx likec4 start .archtrace/actual/likec4`.
 - one interactive Emerge graph per language (file level, with clusters and hotspots).
 
 `--per-element` adds a separate Emerge analysis for each element, useful for large
-subsystems. Add `.archguard/` to your `.gitignore`.
+subsystems. Add `.archtrace/` to your `.gitignore`.
 
 ## 5. Resolve violations
 
@@ -176,7 +186,7 @@ so, and records every decision in `ALIGNMENT.md` next to the model.
 | `init` | `--from-code` | Also draw today's dependencies, for you to review |
 | `check` | `--json` | Machine-readable output, for CI or AI agents |
 | `check` | `--no-network` | Skip docker-compose and Kubernetes configs |
-| `actual` | `--out <dir>` | Where to write results (default: `.archguard/actual`) |
+| `actual` | `--out <dir>` | Where to write results (default: `.archtrace/actual`) |
 | `actual` | `--per-element` | Also analyze each element separately |
 | `install-skill` | `--global` | Install to `~/.claude/skills` for all projects |
 | `install-skill` | `--force` | Replace existing copies |
@@ -207,15 +217,15 @@ directly, and the shop calls an analytics service that isn't in the model.
 
 ```
 cd sample
-archguard check
-archguard actual                              # needs Emerge
+archtrace check
+archtrace actual                              # needs Emerge
 npx likec4 start architecture                 # the approved model
-npx likec4 start .archguard/actual/likec4     # the code as it really is
+npx likec4 start .archtrace/actual/likec4     # the code as it really is
 ```
 
 ## How it's built
 
-ArchGuard never touches the code of the tools it uses. It installs them as
+archtrace never touches the code of the tools it uses. It installs them as
 dependencies (or calls their CLI) and uses their documented interfaces. Each tool has
 one small adapter that translates to and from a neutral format, so the core check
 doesn't depend on any tool:
@@ -228,9 +238,9 @@ src/
   adapters/deploy-config.ts      docker-compose / Kubernetes -> network connections
   adapters/emerge.ts             Emerge config, run, and results
   check.ts                       the rules, on the neutral format only
-  actual.ts                      `archguard actual`: Emerge results on the model
+  actual.ts                      `archtrace actual`: Emerge results on the model
   report.ts                      human-readable check output
-  init.ts                        `archguard init`: starter model from folders
+  init.ts                        `archtrace init`: starter model from folders
   install-skill.ts               copies the bundled Claude Code skills
   cli.ts                         command line
 skills/
@@ -252,6 +262,13 @@ npm test
 The tests run the real tools on copies of the sample. The Emerge test is skipped when
 Emerge isn't installed. Tool versions are pinned in `package.json`, so an upgrade that
 breaks something shows up as a failing test in the matching adapter.
+
+## Releasing
+
+1. Bump `version` in `package.json`.
+2. `npm publish` (runs the build and the tests first; the first time, run `npm login`).
+3. For the Agensi listings, zip each folder in `skills/` with the folder as the top
+   level: `cd skills && zip -r ../draft-architecture.zip draft-architecture`.
 
 ## Licenses
 

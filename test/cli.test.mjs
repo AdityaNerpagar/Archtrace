@@ -11,7 +11,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const cli = join(root, 'dist', 'cli.js')
 
 function withSample(fn) {
-  const dir = mkdtempSync(join(tmpdir(), 'archguard-'))
+  const dir = mkdtempSync(join(tmpdir(), 'archtrace-'))
   cpSync(join(root, 'sample'), dir, { recursive: true })
   try { return fn(dir) } finally { rmSync(dir, { recursive: true, force: true }) }
 }
@@ -73,7 +73,7 @@ const runCmd = (dir, ...args) => spawnSync('node', [cli, ...args], { cwd: dir, e
 test('check explains how to create a model when there is none', () => withSample(dir => {
   const r = run(dir, '--model', 'design')
   assert.equal(r.status, 2)
-  assert.match(r.stderr, /archguard init --model design/)
+  assert.match(r.stderr, /archtrace init --model design/)
 }))
 
 test('init creates a valid model in a custom folder; every import is flagged until arrows are drawn', () => withSample(dir => {
@@ -215,7 +215,7 @@ test('actual: maps Emerge results onto the model and writes a valid diagram', { 
   assert.match(r.stdout, /✗ Web app → Database access\s+1 import\s+not in model/)
   assert.match(r.stdout, /✓ Web app → Orders/)
   assert.match(r.stdout, /✗ Shop → Analytics\s+not in model/)
-  const diagram = readFileSync(join(dir, '.archguard/actual/likec4/actual.c4'), 'utf8')
+  const diagram = readFileSync(join(dir, '.archtrace/actual/likec4/actual.c4'), 'utf8')
   assert.match(diagram, /shop\.web -> shop\.db '1 import \(not in model\)'/)
   assert.match(diagram, /shop -> analytics 'network \(not in model\)'/)
 }))
@@ -224,5 +224,5 @@ test('actual: explains how to install Emerge when it is missing', () => withSamp
   const r = spawnSync('node', [cli, 'actual'], { cwd: dir, encoding: 'utf8', env: { ...process.env, PATH: dirname(process.execPath) } })
   assert.equal(r.status, 2)
   assert.match(r.stderr, /uv tool install emerge-viz/)
-  assert.ok(readFileSync(join(dir, '.archguard/actual/emerge.yaml'), 'utf8').includes('overview-typescript'))
+  assert.ok(readFileSync(join(dir, '.archtrace/actual/emerge.yaml'), 'utf8').includes('overview-typescript'))
 }))

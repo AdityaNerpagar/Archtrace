@@ -1,5 +1,5 @@
 /**
- * `archguard init`: writes a starter LikeC4 model with one element per source folder,
+ * `archtrace init`: writes a starter LikeC4 model with one element per source folder,
  * so you only have to fix names, descriptions and arrows.
  */
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -85,13 +85,13 @@ export function renderModel(plan: InitPlan, found: { from: string; to: string; i
   const q = (s: string) => `'${s.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`
   const out: string[] = []
   out.push(
-    '// Starter architecture model created by `archguard init`.',
+    '// Starter architecture model created by `archtrace init`.',
     '//',
     '// How to finish it:',
     '//   1. Rename elements and write a one-sentence description for each.',
     '//   2. Merge folders that belong together; delete ones that aren\'t architecture.',
     '//   3. Draw the ALLOWED dependencies as arrows. Anything not drawn is not allowed.',
-    '//   4. Check it: `archguard check`. View it: `npx likec4 start <this folder>`.',
+    '//   4. Check it: `archtrace check`. View it: `npx likec4 start <this folder>`.',
     '//   5. When the team agrees, change status from \'draft\' to \'approved\'.',
     '',
     'specification {',
@@ -125,7 +125,7 @@ export function renderModel(plan: InitPlan, found: { from: string; to: string; i
   if (found.length > 0) {
     out.push(
       '    // Dependencies that exist in the code TODAY. They are not automatically right:',
-      '    // delete any that shouldn\'t exist, then `archguard check` will flag that code.',
+      '    // delete any that shouldn\'t exist, then `archtrace check` will flag that code.',
     )
     for (const d of found) {
       out.push(`    ${d.from} -> ${d.to} 'uses' // found in code: ${d.imports} import${d.imports === 1 ? '' : 's'}`)

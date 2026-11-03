@@ -131,17 +131,19 @@ export function check(
   }
 
   const hasChildren = (c: Component) => model.components.some(k => k.parent === c.id)
+  const missingFolders = mapped.filter(c => !existsSync(join(projectDir, c.codePath!)))
   const mappedToService = new Set([...serviceMap.values()].map(c => c.id))
 
   return {
     violations: [...violations.values()],
     networkViolations: [...networkViolations.values()],
     unmappedComponents: model.components.filter(c => !c.codePath && !hasChildren(c) && !c.services?.length && !mappedToService.has(c.id)),
-    missingFolders: mapped.filter(c => !existsSync(join(projectDir, c.codePath!))),
+    missingFolders,
     unmappedFiles: files.filter(f => !ownerOf(f)),
     unmappedServices: (deploy?.services ?? []).filter(s => !serviceMap.has(s.name)).map(s => ({ name: s.name, file: s.file })),
     serviceMapping: Object.fromEntries([...serviceMap].map(([s, c]) => [s, c.id])),
     deployFiles: deploy?.filesRead ?? [],
     filesScanned: files.length,
+    codeFoldersChecked: mapped.length - missingFolders.length,
   }
 }

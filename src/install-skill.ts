@@ -1,5 +1,5 @@
 /**
- * `archguard install-skill`: copies the bundled Claude Code skills into a project
+ * `archtrace install-skill`: copies the bundled Claude Code skills into a project
  * (.claude/skills/) or into the user's global skills (~/.claude/skills/).
  */
 import { cpSync, existsSync, readdirSync } from 'node:fs'

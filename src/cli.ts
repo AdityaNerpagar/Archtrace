@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { relative, resolve } from 'node:path'
 import { readLikeC4 } from './adapters/likec4.js'
 import { scanImports } from './adapters/dependency-cruiser.js'
@@ -12,7 +12,7 @@ import { readProjectName } from './init.js'
 import { scanDeployConfigs } from './adapters/deploy-config.js'
 import { makeRules, mapServices } from './check.js'
 
-const USAGE = `Usage: archguard <command> [options]
+const USAGE = `Usage: archtrace <command> [options]
 
 Commands:
   init            Create a starter architecture model from your source folders
@@ -33,17 +33,22 @@ check options:
   --no-network      Skip docker-compose and Kubernetes configs
 
 actual options:
-  --out <dir>       Where to write results (default: .archguard/actual)
+  --out <dir>       Where to write results (default: .archtrace/actual)
   --per-element     Also run a separate Emerge analysis for each element
 
 install-skill options:
   --global          Install for all your projects (~/.claude/skills) instead of this one
   --force           Replace an existing copy
 
+  -v, --version     Show the version
   -h, --help        Show this help`
 
 async function main(argv: string[]): Promise<number> {
   const [command, ...rest] = argv
+  if (command === '-v' || command === '--version' || command === 'version') {
+    console.log(packageVersion())
+    return 0
+  }
   if (!command || command === '-h' || command === '--help') {
     console.log(USAGE)
     return 0
@@ -106,9 +111,9 @@ async function runInit(projectDir: string, modelDir: string, modelArg: string, s
   const flag = modelArg === 'architecture' ? '' : ` --model ${modelArg}`
   console.log(`\nNext:
   1. Edit the model: names, descriptions, and the allowed arrows.
-     Or let Claude Code fill it in from your docs: archguard install-skill
+     Or let Claude Code fill it in from your docs: archtrace install-skill
   2. View it:  npx likec4 start ${modelArg}
-  3. Check it: archguard check${flag}`)
+  3. Check it: archtrace check${flag}`)
   return 0
 }
 
@@ -118,8 +123,8 @@ async function loadModel(modelDir: string, modelArg: string) {
   if (!hasModel) {
     const flag = modelArg === 'architecture' ? '' : ` --model ${modelArg}`
     throw new Error(`No architecture model found in "${modelArg}".
-Create one with:  archguard init${flag}
-Or draft it from your docs in Claude Code after:  archguard install-skill`)
+Create one with:  archtrace init${flag}
+Or draft it from your docs in Claude Code after:  archtrace install-skill`)
   }
   return readLikeC4(modelDir)
 }
@@ -130,7 +135,7 @@ async function runActualCommand(projectDir: string, modelDir: string, modelArg: 
     console.error('No element has "code" metadata, so there is no code to analyze.')
     return 2
   }
-  const opts = { projectDir, outDir: resolve(projectDir, out ?? '.archguard/actual'), perElement }
+  const opts = { projectDir, outDir: resolve(projectDir, out ?? '.archtrace/actual'), perElement }
   const analyses = planAnalyses(model, opts)
   if (analyses.length === 0) {
     console.error('Found no source files Emerge can analyze in the mapped folders.')
@@ -148,7 +153,7 @@ async function runActualCommand(projectDir: string, modelDir: string, modelArg: 
   }
   const summary = runActual(model, analyses, opts, readProjectName(projectDir), [...network.values()])
   if ('missing' in summary) {
-    console.error(`${INSTALL_HINT}\n\nThe Emerge config is ready; after installing, run: archguard actual${modelArg === 'architecture' ? '' : ` --model ${modelArg}`}`)
+    console.error(`${INSTALL_HINT}\n\nThe Emerge config is ready; after installing, run: archtrace actual${modelArg === 'architecture' ? '' : ` --model ${modelArg}`}`)
     return 2
   }
   await readLikeC4(summary.diagramDir) // fails loudly if the generated diagram isn't valid LikeC4
@@ -178,10 +183,16 @@ async function runCheck(projectDir: string, modelDir: string, modelArg: string, 
   return result.violations.length + result.networkViolations.length > 0 ? 1 : 0
 }
 
+function packageVersion(): string {
+  // dist/cli.js -> <package>/package.json
+  const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
+  return String(pkg.version)
+}
+
 main(process.argv.slice(2)).then(
   code => process.exit(code),
   err => {
-    console.error(`archguard: ${err instanceof Error ? err.message : String(err)}`)
+    console.error(`archtrace: ${err instanceof Error ? err.message : String(err)}`)
     process.exit(2)
   },
 )

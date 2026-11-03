@@ -23,7 +23,7 @@ export const EMERGE_LANGUAGES: Record<string, string[]> = {
   c: ['.c', '.h'],
 }
 
-export const IGNORED_DIRS = ['node_modules', 'dist', 'build', 'coverage', '.git', '.archguard', 'vendor', '__pycache__', '.venv', 'venv', 'target']
+export const IGNORED_DIRS = ['node_modules', 'dist', 'build', 'coverage', '.git', '.archtrace', 'vendor', '__pycache__', '.venv', 'venv', 'target']
 
 export interface EmergeAnalysis {
   /** Safe name, also the output subfolder */

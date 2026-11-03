@@ -62,4 +62,6 @@ export interface CheckResult {
   /** Source files that belong to no component */
   unmappedFiles: string[]
   filesScanned: number
+  /** Mapped code folders that exist on disk */
+  codeFoldersChecked: number
 }

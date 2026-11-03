@@ -1,6 +1,6 @@
 # Third-party notices
 
-ArchGuard does not copy code from these projects. It installs them as npm
+archtrace does not copy code from these projects. It installs them as npm
 dependencies and uses them through their public APIs, unmodified. Their full
 license texts ship inside each package in `node_modules`.
 
@@ -11,11 +11,11 @@ license texts ship inside each package in `node_modules`.
 | [yaml](https://github.com/eemeli/yaml) | 2.9.1 | ISC | Reading docker-compose and Kubernetes files |
 
 Optional, installed separately by the user and run as a command-line program
-(not bundled or distributed with ArchGuard):
+(not bundled or distributed with archtrace):
 
 | Project | Tested version | License | Used for |
 | --- | --- | --- | --- |
-| [Emerge](https://github.com/glato/emerge) | 2.0.7 | MIT | `archguard actual` |
+| [Emerge](https://github.com/glato/emerge) | 2.0.7 | MIT | `archtrace actual` |
 
 Transitive dependencies are mostly MIT, ISC, Apache-2.0 and BSD licensed.
 One, `lightningcss` (pulled in by LikeC4), is MPL-2.0; it is used unmodified,

@@ -25,6 +25,9 @@ export function formatReport(result: CheckResult): string {
   }
 
   const warnings: string[] = []
+  if (result.codeFoldersChecked > 0 && result.filesScanned === 0) {
+    warnings.push('no JavaScript or TypeScript files were found in the code folders, so imports were not checked (other languages are not supported yet; network connections still are)')
+  }
   for (const c of result.missingFolders) warnings.push(`${name(c)}: folder "${c.codePath}" doesn't exist`)
   for (const c of result.unmappedComponents) warnings.push(`${name(c)}: no "code" or "service" metadata, so it isn't checked`)
   for (const s of result.unmappedServices) {

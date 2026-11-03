@@ -37,7 +37,7 @@ export interface DeployScan {
   filesSkipped: string[]
 }
 
-const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', 'coverage', '.archguard', 'vendor', 'target', '.venv', 'venv'])
+const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', 'coverage', '.archtrace', 'vendor', 'target', '.venv', 'venv'])
 const WORKLOAD_KINDS = new Set(['Deployment', 'StatefulSet', 'DaemonSet', 'ReplicaSet', 'Job', 'CronJob', 'Pod'])
 
 export function scanDeployConfigs(projectDir: string): DeployScan {
